@@ -1,0 +1,249 @@
+enum EPageType {
+	ProfileLandingPage = 'profile-landing-page',
+	StateProfile = 'state-profile-page',
+	CityProfile = 'city-profile-page',
+	RegionProfile = 'region-profile-page',
+	SuburbProfile = 'suburb-profile-page',
+	Agent = 'agent-detail-page',
+	Agency = 'agency-detail-page',
+	Auction = 'auction-page',
+	/*
+	AuctionSearchResultPage
+	AuctionLandingPage
+	FindAgentLandingPage
+
+	 */
+	SoldLanding = 'sold-landing-page',
+	RentLanding = 'rent-landing-page',
+	SoldPropertyDetail = 'sold-property-details',
+	RentPropertyDetail = 'rent-property-details',
+	BuyPropertyDetail = 'buy-property-details',
+	SoldSearchResult = 'sold-search-result-page',
+	RentSearchResult = 'rent-search-result-page',
+	BuySearchResult = 'buy-search-result-page'
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+static decodeQueryParams(queryParams: string): Record<string, string> {
+		if(queryParams[0] === '?') {
+			queryParams = queryParams.slice(1);
+		}
+		queryParams = decodeURIComponent(queryParams);
+		const result: Record<string, string> = {};
+		const params = queryParams.split('&');
+		params.forEach((param) => {
+			const [key, value] = param.split('=');
+			result[key] = value;
+		});
+		return result;
+     	}
+    
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     	static generateQueryParams(data:Record<string,any>):string{
+		const result = Object.keys(data).map((key) => {
+			if (Array.isArray(data[key])) {
+				return data[key].map((item: string) => `${key}=${encodeURI(item)}`).join('&');
+			}
+			return `${key}=${encodeURI(data[key])}`;
+			}).join('&');
+		return `?${result}`
+     	}
+
+
+	/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+
+
+abstract class ProfileDataFromUrl<T> {
+  url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  getData = (): T | boolean => {
+    const state = ProfileDataFromUrl.getState(this.url);
+    if (!state) {
+      return false;
+    }
+
+    const location = this.getLocation(this.url);
+    return { state, ...location };
+  };
+
+  private static getState(url: string): string | void {
+    const state = url.match(/for-(.*?)\//);
+    if (!state) {
+      return;
+    }
+    return state[1];
+  }
+
+  abstract getLocation(url: string): T;
+}
+
+class ProfileDataFromUrlWithState extends ProfileDataFromUrl<{}> {
+  getLocation = (): {} => {
+    return {};
+  };
+}
+
+class ProfileDataFromUrlWithCity extends ProfileDataFromUrl<ICity> {
+  getLocation = (url: string): ICity => {
+    const city = url.match(/(.*?)\-city\-/);
+    const cityId = url.match(/city\-(.*?)\//);
+    if (!city || !cityId) {
+      return { city: "", cityId: NaN };
+    }
+    return { city: city[1], cityId: Number(cityId[1]) };
+  };
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/* class ProfileDataFromUrl1 {
+  private static getState(url: string): string | void {
+    const state = url.match(/for-(.*?)\//);
+    if (!state) {
+      return;
+    }
+    return state[1];
+  }
+
+  static getProfileDataFromUrlWithState(url: string): IState | boolean {
+    if (!UrlType.isStateProfile(url)) {
+      return false;
+    }
+    const state = ProfileDataFromUrl1.getState(url);
+    if (!state) {
+      return false;
+    }
+    return { state };
+  }
+
+  static getProfileDataFromUrlWithCity(url: string): ICityProfileWithState | boolean {
+    if (!UrlType.isCityProfile(url)) {
+      return false;
+    }
+    const citySlug = url.match(/for-(.*?)\/(.*)-city-(\d+)\/$/);
+    if (!citySlug) {
+      return false;
+    }
+    const state = ProfileDataFromUrl1.getState(url);
+    if (!state) {
+      return false;
+    }
+    let city = citySlug[2];
+    city = UtilsService.slugToName(city);
+    const cityId = parseInt(citySlug[3]);
+    return { state, city, cityId };
+  }
+
+  static getProfileDataFromUrlWithRegion(url: string): IRegionProfileWithState | boolean {
+    if (!UrlType.isRegionProfile(url)) {
+      return false;
+    }
+    const state = ProfileDataFromUrl1.getState(url);
+    if (!state) {
+      return false;
+    }
+    const regionSlug = url.match(/for-(.*?)\/(.*)-region-(\d+)\/$/);
+    if (!regionSlug) {
+      return false;
+    }
+    let region = regionSlug[2];
+    region = UtilsService.slugToName(region);
+    const regionId = parseInt(regionSlug[3]);
+    return { state, region, regionId };
+  }
+
+  static getProfileDataFromUrlWithSuburb(url: string): ISuburbProfileWithState | boolean {
+    if (!UrlType.isSuburbProfile(url)) {
+      return false;
+    }
+    const state = ProfileDataFromUrl1.getState(url);
+    if (!state) {
+      return false;
+    }
+    const suburbSlug = url.match(/for-(.*?)\/(.*)-(\d+)\/$/);
+    if (!suburbSlug) {
+      return false;
+    }
+    let suburb = suburbSlug[2];
+    suburb = UtilsService.slugToName(suburb);
+    const postalCode = parseInt(suburbSlug[3]);
+    return { state, suburb, postalCode };
+  }
+
+  static getProfileDataFromUrl(url: string) {
+    if (UrlType.isProfileLandingUrl(url)) {
+      return false;
+    }
+    if (UrlType.isProfileLandingUrl(url)) {
+      return false;
+    }
+
+    if (UrlType.isStateProfile(url)) {
+      return ProfileDataFromUrl1.getProfileDataFromUrlWithState(url);
+    }
+    if (UrlType.isCityProfile(url)) {
+      return ProfileDataFromUrl1.getProfileDataFromUrlWithCity(url);
+    }
+    if (UrlType.isRegionProfile(url)) {
+      return ProfileDataFromUrl1.getProfileDataFromUrlWithRegion(url);
+    }
+    return ProfileDataFromUrl1.getProfileDataFromUrlWithSuburb(url);
+  }
+} */
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+buy rent sold
+
+https://www.realestateview.com.au/
+https://www.realestateview.com.au/rental-properties/
+https://www.realestateview.com.au/sold-properties/
+
+https://www.realestateview.com.au/for-sale/in-nsw-richmond-hill-2480/
+https://www.realestateview.com.au/for-rent/in-nsw-richmond-hill-2480/
+https://www.realestateview.com.au/sold-properties/in-nsw-richmond-hill-2480/
+
+https://www.realestateview.com.au/real-estate/21-whispering-valley-drive-richmond-hill-nsw/property-details-buy-residential-14302239/
+https://www.realestateview.com.au/rental-properties/6-sovereign-place-goonellabah-nsw/property-details-rent-residential-14300453/
+https://www.realestateview.com.au/real-estate/15-roder-place-richmond-hill-nsw/property-details-sold-residential-13558973/
+
+Location Profile
+
+https://resi.uatz.view.com.au/profile/
+
+https://resi.uatz.view.com.au/profile/for-act/
+https://resi.uatz.view.com.au/profile/for-qld/cairns-region-92/
+https://resi.uatz.view.com.au/profile/for-qld/cairns-city-92/
+https://resi.uatz.view.com.au/profile/for-qld/cairns-92/
+
+Price Estimator 
+
+https://www.realestateview.com.au/property-360/
+https://www.realestateview.com.au/property-360/property/211-broadwater-avenue-west-maroochydore-qld-4558/
+
+Agent
+https://www.realestateview.com.au/find-agent/
+https://www.realestateview.com.au/agent-profile/vicki-sayers-41300/
+
+
+Agency
+https://www.realestateview.com.au/find-agent/?loc=Melbourne%7CVIC
+https://www.realestateview.com.au/real-estate-agency/rt-edgar-mt-eliza-mount-eliza-26758/
+
+
+Auction
+https://www.realestateview.com.au/sales-and-auction-results/victoria/
+https://www.realestateview.com.au/sales-and-auction-results/in-vic-richmond-3121/
+
+
+hello
