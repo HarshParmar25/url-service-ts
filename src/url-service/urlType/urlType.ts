@@ -64,6 +64,9 @@ export class UrlType {
       case UrlType.isAuctionSearchResultUrl(url):
         urlType = EPageType.AuctionSearchResult;
         break;
+      case UrlType.isAuctionMultipleSearchResultUrl(url):
+        urlType = EPageType.AuctionMultipleSearchResult;
+        break;
       case UrlType.isPriceEstimatorLanding(url):
         urlType = EPageType.PriceEstimatorLanding;
         break;
@@ -191,11 +194,21 @@ export class UrlType {
   }
 
   static isAuctionLanding(url: string) {
-    return url.includes("sales-and-auction-results/") && !url.includes("sales-and-auction-results/in-");
+    if (url.match(/sales-and-auction-results\/[a-zA-Z-]+\/?$/gm)) {
+      return true;
+    }
+    return false;
   }
 
   static isAuctionSearchResultUrl(url: string) {
     return url.includes("sales-and-auction-results/in-");
+  }
+
+  static isAuctionMultipleSearchResultUrl(url: string) {
+     if (url.match(/sales-and-auction-results\/[a-zA-Z-]+\/suburbs\/\?.*/gm)) {
+       return true;
+     }
+     return false; 
   }
 
   static isPriceEstimatorLanding(url: string) {

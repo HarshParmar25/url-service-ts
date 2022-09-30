@@ -146,4 +146,12 @@ describe("UrlType", () => {
     const result = EPageType.BuyLanding;
     expect(data).toEqual(result);
   });
+
+  test("Buy landing page ", () => {
+    const data = UrlType.getType(
+      `https://www.realestateview.com.au/sales-and-auction-results/victoria/suburbs/?loc=Colac%20East%7CVIC%7C3250,Melbourne%20Airport%7CVIC%7C3045,Rich%20Avon%7CVIC%7C3480`
+    );
+    const result = EPageType.AuctionMultipleSearchResult;
+    expect(data).toEqual(result);
+  });
 });

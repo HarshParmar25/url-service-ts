@@ -4,7 +4,7 @@ interface IPartialFilterProperties {
   propertyTypes?: string[];
   bedrooms?: number;
   saleMethod: string;
-  queryParam?: Record<string, string> 
+  queryParams?: Record<string, string>;
 }
 
 interface IFilterWithState extends IPartialFilterProperties {
@@ -48,6 +48,7 @@ interface IPropertyDetails {
   listingId: number;
   address: string;
   state: string;
+  queryParams?: Record<string, string>;
 }
 
 interface IPropertyDetailsWithSuburb extends IPropertyDetails {

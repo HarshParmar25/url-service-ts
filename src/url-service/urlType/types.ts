@@ -19,6 +19,7 @@ export enum EPageType {
   AgencyDetail = "agency-detail-page",
   AuctionLanding = "auction-landing-page",
   AuctionSearchResult = "auction-search-result-page",
+  AuctionMultipleSearchResult = "auction-multiple-search-result-page",
   PriceEstimatorLanding = "price-estimator-landing-page",
   PriceEstimatorSearchResult = "price-estimator-result-page",
 }

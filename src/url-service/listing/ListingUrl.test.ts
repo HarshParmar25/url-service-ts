@@ -1,6 +1,29 @@
 import Listing from "./ListingUrl";
 
 describe("Get Buy-rent-sold page Data from url", () => {
+  test("for-rent/studios-and-townhouses-and-villas-in-vic-richmond-3121-with-1-bedroom-between-200-and-300-per-week/?bathrooms=2&cars=3&keywords=Built%20in%20Robes,Ensuite", () => {
+    const data = Listing.getDataFromSearchResultUrlWithSuburb(
+      `for-rent/studios-and-townhouses-and-villas-in-vic-richmond-3121-with-1-bedroom-between-200-and-300-per-week/?bathrooms=2&cars=3&keywords=Built%20in%20Robes,Ensuite`
+    );
+    const result = {
+      saleMethod: "Rent",
+      state: "vic",
+      suburb: "Richmond",
+      postalCode: 3121,
+      minPrice: 200,
+      maxPrice: 300,
+      propertyTypes: ["Studios", "Townhouses", "Villas"],
+      bedrooms: 1,
+      queryParams: {
+        bathrooms: '2',
+        cars: '3',
+        keywords: "Built in Robes,Ensuite",
+      },
+    };
+
+    expect(data).toEqual(result);
+  });
+
   test("for-sale/in-vic/?name=Harsh", () => {
     const data = Listing.getDataFromSearchResultUrlWithState(`for-sale/in-vic/?name=Harsh`);
     const result = {
@@ -28,7 +51,7 @@ describe("Get Buy-rent-sold page Data from url", () => {
       bedrooms: 1,
       queryParams: {
         name: "Harsh",
-        age:'20',
+        age: "20",
       },
     };
 
@@ -285,8 +308,15 @@ describe("Get Buy-rent-sold page Data from any listing url", () => {
 //////////////////////////////////////////////////////////////////////////////
 describe("Get Buy-rent-sold page Url From any listing data", () => {
   test("Get sale state url", () => {
-    const data = Listing.getUrlFromAnySearchResultData({ saleMethod: "Sale", state: "vic" });
-    const result = `/for-sale/in-vic/`;
+    const data = Listing.getUrlFromAnySearchResultData({
+      saleMethod: "Sale",
+      state: "vic",
+      queryParams: {
+        name: "Harsh",
+        age: "20",
+      },
+    });
+    const result = `/for-sale/in-vic/?name=Harsh&age=20`;
 
     expect(data).toEqual(result);
   });
@@ -560,8 +590,12 @@ describe("Buy-rent-sold page Url From listing data", () => {
       minPrice: 50000,
       propertyTypes: ["Studios", "Townhouses", "Villas"],
       bedrooms: 1,
+      queryParams: {
+        name: "Harsh",
+        age: "20",
+      },
     });
-    const result = `/for-sale/studios-and-townhouses-and-villas-in-vic-richmond-3121-with-1-bedroom-from-50000/`;
+    const result = `/for-sale/studios-and-townhouses-and-villas-in-vic-richmond-3121-with-1-bedroom-from-50000/?name=Harsh&age=20`;
 
     expect(data).toEqual(result);
   });
@@ -624,13 +658,17 @@ describe("Get Listing Details From Url", () => {
   test(`/real-estate/13-canungra-road-city-beach-wa/property-details-buy-residential-14289642/
 	`, () => {
     const data = Listing.getPropertyDetailsFromUrl(
-      `/13-canungra-road-city-beach-wa/property-details-buy-residential-14289642/`
+      `/13-canungra-road-city-beach-wa/property-details-buy-residential-14289642/?bedrooms=4&bathrooms=2`
     );
     const result = {
       saleMethod: "Buy",
       listingId: 14289642,
       address: "13 Canungra Road City Beach Wa",
       state: "wa",
+      queryParams: {
+        bedrooms: "4",
+        bathrooms: "2",
+      },
     };
 
     expect(data).toEqual(result);
@@ -691,6 +729,10 @@ describe("Get Url From Listing Details", () => {
 	address: "1312-11 canungra road",
 	suburb: "City Beach",
 	state: "wa",
+  queryParams: {
+        bedrooms: '4',
+        bathrooms: '2',
+      },
 	}`, () => {
     const data = Listing.getUrlFromPropertyDetails({
       saleMethod: "Rent",
@@ -698,8 +740,12 @@ describe("Get Url From Listing Details", () => {
       address: "1312-11 Canungra Road",
       suburb: "City Beach",
       state: "Wa",
+      queryParams: {
+        bedrooms: "4",
+        bathrooms: "2",
+      },
     });
-    const result = `/rental-properties/1312-11-canungra-road-city-beach-wa/property-details-rent-residential-14289682/`;
+    const result = `/rental-properties/1312-11-canungra-road-city-beach-wa/property-details-rent-residential-14289682/?bedrooms=4&bathrooms=2`;
 
     expect(data).toEqual(result);
   });

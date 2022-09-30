@@ -3,7 +3,9 @@ import { IPropertyDetailsWithSuburb, IPropertyDetails } from "./listingUrl.inter
 
 export class PropertyDetails {
   private static baseUrl = `/`;
-  static getPropertyDetailsFromUrl(url: string): IPropertyDetails | boolean {
+  static getPropertyDetailsFromUrl(pageUrl: string): IPropertyDetails | boolean {
+    const [url, queryUrl] = pageUrl.split("?");
+    const queryParams = UtilsService.decodeQueryParams(queryUrl);
     const data = url.split("/" || "/?");
     if (!data[0]) {
       data.shift();
@@ -12,13 +14,18 @@ export class PropertyDetails {
     const listingId = this.getlistingId(data[1]);
     const { address, state } = this.getLocationForPropertyDetails(data[0]);
     if (saleMethod && listingId) {
-      return { saleMethod, listingId, address, state };
+      const result = { saleMethod, listingId, address, state, queryParams };
+      return UtilsService.removeEmptyValues<IPropertyDetails>(result);
     }
 
     return false;
   }
 
   static getUrlFromPropertyDetails(data: IPropertyDetailsWithSuburb): string {
+    let queryParams = "";
+    if (data.queryParams) {
+      queryParams = UtilsService.generateQueryParams(data.queryParams);
+    }
     const saleMethod = UtilsService.slugify(data.saleMethod);
     let propertyTypeUrl = `real-estate/`;
     if (saleMethod.toLowerCase() === "rent") {
@@ -26,7 +33,7 @@ export class PropertyDetails {
     }
     let slug = `${data.address}-${data.suburb}-${data.state}`;
     slug = UtilsService.slugify(slug);
-    return `${this.baseUrl}${propertyTypeUrl}${slug}/property-details-${saleMethod}-residential-${data.listingId}/`;
+    return `${this.baseUrl}${propertyTypeUrl}${slug}/property-details-${saleMethod}-residential-${data.listingId}/${queryParams}`;
   }
 
   private static getLocationForPropertyDetails(url: string): { address: string; state: string } {
