@@ -1,6 +1,14 @@
 import UtilsService from "../../utils/index";
 import { UrlType } from "../urlType/urlType";
-import { ICity, IRegion, ISuburb } from "./profileUrl.interface";
+import {
+  ICity,
+  ICityProfileWithState,
+  IRegion,
+  IRegionProfileWithState,
+  IState,
+  ISuburb,
+  ISuburbProfileWithState,
+} from "./profileUrl.interface";
 
 abstract class ProfileDataFromUrl<T> {
   constructor(public url: string) {
@@ -11,15 +19,18 @@ abstract class ProfileDataFromUrl<T> {
     if (UrlType.isProfileLandingUrl(this.url)) {
       return false;
     }
-    const state = ProfileDataFromUrl.getState(this.url);
+    const [url, queryUrl] = this.url.split("?");
+    const queryParams = UtilsService.decodeQueryParams(queryUrl);
+    const state = ProfileDataFromUrl.getState(url);
     if (!state) {
       return false;
     }
-    const location = this.getLocation(this.url);
+    const location = this.getLocation(url);
     if (!location) {
       return false;
     }
-    return { state, ...location };
+    const result = { state, ...location, queryParams };
+    return UtilsService.removeEmptyValues<T>(result);
   };
 
   private static getState(url: string): string | void {
@@ -30,9 +41,9 @@ abstract class ProfileDataFromUrl<T> {
     return state[1];
   }
 
-  abstract getLocation(url: string): T | void;
+  abstract getLocation(url: string): Omit<T, "state"> | void;
 }
-export class DataFromProfileUrlWithState extends ProfileDataFromUrl<{}> {
+export class DataFromProfileUrlWithState extends ProfileDataFromUrl<IState> {
   getLocation = (url: string): {} | void => {
     if (!UrlType.isStateProfile(url)) {
       return;
@@ -40,7 +51,7 @@ export class DataFromProfileUrlWithState extends ProfileDataFromUrl<{}> {
     return {};
   };
 }
-export class DataFromProfileUrlWithCity extends ProfileDataFromUrl<ICity> {
+export class DataFromProfileUrlWithCity extends ProfileDataFromUrl<ICityProfileWithState> {
   getLocation = (url: string): ICity | void => {
     if (!UrlType.isCityProfile(url)) {
       return;
@@ -55,7 +66,7 @@ export class DataFromProfileUrlWithCity extends ProfileDataFromUrl<ICity> {
     return { city, cityId };
   };
 }
-export class DataFromProfileUrlWithRegion extends ProfileDataFromUrl<IRegion> {
+export class DataFromProfileUrlWithRegion extends ProfileDataFromUrl<IRegionProfileWithState> {
   getLocation = (url: string): IRegion | void => {
     if (!UrlType.isRegionProfile(url)) {
       return;
@@ -70,7 +81,7 @@ export class DataFromProfileUrlWithRegion extends ProfileDataFromUrl<IRegion> {
     return { region, regionId };
   };
 }
-export class DataFromProfileUrlWithSuburb extends ProfileDataFromUrl<ISuburb> {
+export class DataFromProfileUrlWithSuburb extends ProfileDataFromUrl<ISuburbProfileWithState> {
   getLocation = (url: string): ISuburb | void => {
     if (!UrlType.isSuburbProfile(url)) {
       return;

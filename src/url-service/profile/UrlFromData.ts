@@ -14,10 +14,14 @@ abstract class ProfileUrlFromData {
   private static baseUrl = "/profile/";
 
   getUrl = (): string => {
+    let queryParams = "";
+    if (this.data.queryParams) {
+      queryParams = UtilsService.generateQueryParams(this.data.queryParams);
+    }
     let state = `for-${this.data.state}`;
     state = UtilsService.slugify(state);
     let location = this.getLocation(this.data);
-    return `${ProfileUrlFromData.baseUrl}${state}/${location}`;
+    return `${ProfileUrlFromData.baseUrl}${state}/${location}${queryParams}`;
   };
 
   abstract getLocation(data: ILocationProfile): string;

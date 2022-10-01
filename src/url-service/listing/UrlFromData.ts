@@ -21,12 +21,17 @@ abstract class UrlFromListingSearchResultData {
   }
 
   getUrl = () => {
+    let queryParams = "";
+    if (this.data.queryParams) {
+      queryParams = UtilsService.generateQueryParams(this.data.queryParams);
+    }
+
     const { saleMethod, priceFilter, bedroomFilter, propertyTypesFilter } = this.getFilterSlugs(this.data);
     const location = this.getLocationSlug(this.data);
     let filters = `${propertyTypesFilter}in-${location}${bedroomFilter}${priceFilter}`;
     filters = UtilsService.slugify(filters);
 
-    return `${this.baseUrl}${saleMethod}/${filters}/`;
+    return `${this.baseUrl}${saleMethod}/${filters}/${queryParams}`;
   };
 
   private getFilterSlugs(data: IFiltersProperties): IFiltersSlugs {
